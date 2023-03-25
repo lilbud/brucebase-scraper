@@ -67,9 +67,14 @@ def setlistFind(URL, show_find, index, fileAsk, printAsk, headerAsk):
 				show.append(titleCase(song.text))
 			if (xn < len(headers) and headerAsk.upper() == 'Y'):
 				show.append("\n")
-				# if (headers[xn] != "Pre-show:" or headers[xn] != "Show:"):
 				show.append(headers[xn])
 				xn+=1
+
+	for song in show:
+		if (song == "\n"):
+			show.remove(song)
+		elif (show[-1] == "Show:"):
+			show.remove("Show:")
 
 	if printAsk.upper() == "Y":
 		print("\n" + pageTitle.text.strip()[0:10] + " - " + pageTitle.text.strip()[11:] + "\n")
@@ -77,11 +82,6 @@ def setlistFind(URL, show_find, index, fileAsk, printAsk, headerAsk):
 			print(song)
 
 	if (fileAsk.upper() == "Y"):
-		if (show[-1] == "Show:"):
-			del show[-1]
-		while (show[-1] == "\n" or show[-1] == ""):
-			del show[-1]
-		
 		fileCreate(show, pageTitle.text.strip(), index)
 
 def processing(URL, show_find):
