@@ -70,8 +70,8 @@ def setlistFind(URL, show_find, index, fileAsk, printAsk, headerAsk):
 				show.append(headers[xn])
 				xn+=1
 
-	for song in show:
-		if (song == "\n"):
+	for i, song in enumerate(show):
+		if (song == "\n" and i == -1):
 			show.remove(song)
 		elif (show[-1] == "Show:"):
 			show.remove("Show:")
@@ -80,7 +80,7 @@ def setlistFind(URL, show_find, index, fileAsk, printAsk, headerAsk):
 		print("\n" + pageTitle.text.strip()[0:10] + " - " + pageTitle.text.strip()[11:] + "\n")
 		for song in show:
 			print(song)
-
+			
 	if (fileAsk.upper() == "Y"):
 		fileCreate(show, pageTitle.text.strip(), index)
 
