@@ -8,9 +8,12 @@ Note: [Python](https://www.python.org/downloads/) needed to run this script, as 
 Program will not run without the above modules
 
 Current options:
-  Get setlist from a specified date (YYYY-MM-DD)
-  Get setlist from a specified month (YYYY-MM-DD)
-  Get setlist from a specified year (YYYY) <- I'm not sure how well this works with larger years
+  
+  - Get setlist from a specified date (YYYY-MM-DD)
+  
+  - Get setlist from a specified month (YYYY-MM-DD)
+  
+  - Get setlist from a specified year (YYYY) <- I'm not sure how well this works with larger years
   
 Repl test version: https://replit.com/@lilbud/Brucebase-Scraper?v=1
 (Note: can't export, also only full date option)
