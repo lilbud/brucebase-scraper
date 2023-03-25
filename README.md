@@ -1,6 +1,8 @@
 # brucebase-scraper
 Python script to scrape setlists from Brucebase
 
+Original concept by Superzann: [here](https://docs.google.com/spreadsheets/d/1ptVECBzRQs3AHBuDyJu19T0X7W04JLEv9soobJI0TU0/edit?usp=drivesdk)
+
 Note: [Python](https://www.python.org/downloads/) needed to run this script, as well as the following modules
 ### Program will not run without these modules
   - requests (pip install requests)
