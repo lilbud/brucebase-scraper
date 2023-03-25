@@ -2,17 +2,14 @@
 Python script to scrape setlists from Brucebase
 
 Note: [Python](https://www.python.org/downloads/) needed to run this script, as well as the following modules
-  requests (pip install requests)
-  BeautifulSoup (pip install BeautifulSoup4)
-  
-Program will not run without the above modules
+### Program will not run without these modules
+  - requests (pip install requests)
+  - BeautifulSoup (pip install BeautifulSoup4)
 
 Current options:
   
   - Get setlist from a specified date (YYYY-MM-DD)
-  
   - Get setlist from a specified month (YYYY-MM-DD)
-  
   - Get setlist from a specified year (YYYY) <- I'm not sure how well this works with larger years
   
 Repl test version: https://replit.com/@lilbud/Brucebase-Scraper?v=1
