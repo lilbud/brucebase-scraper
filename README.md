@@ -1,4 +1,8 @@
 # brucebase-scraper
+
+# WARNING: I AM NOT REPONSIBLE FOR WHAT YOU USE THIS SCRAPER FOR
+### This is my first web scraper and I don't how (if at all) it could affect the brucebase site
+
 Python script to scrape setlists from Brucebase
 
 Original concept by Superzann: [here](https://docs.google.com/spreadsheets/d/1ptVECBzRQs3AHBuDyJu19T0X7W04JLEv9soobJI0TU0/edit?usp=drivesdk)
