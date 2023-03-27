@@ -1,128 +1,112 @@
-import requests, re, os
-from bs4 import BeautifulSoup
+import requests, re, os, sys
+from bs4 import BeautifulSoup as bs4, SoupStrainer as strainer
 
-# enter the folder to save to here, defaults to your documents folder
-folderToSave = os.environ["USERPROFILE"] + "\Documents\BB_Setlists\\"
+global saveDir, URL, show, incHeaders, incSoundcheck, months
+saveDir = os.environ["USERPROFILE"] + "\Documents\BB_Setlists\\"
+URL = "http://brucebase.wikidot.com"
+show = []
+months = ['_None', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-def fileCreate(show, pageTitle, index):
-	date = pageTitle[0:4] + "-" + pageTitle[5:7] + "-" + pageTitle[8:11]
-	direct = folderToSave + pageTitle[0:4] + "\\"
-	num = 0
+print("Brucebase Setlist Scraper: Gets Setlists From brucebase.wikidot.com")
 
-	if (pageTitle[5:7] != "00"):
-		direct = direct + pageTitle[5:7]
+try:
+	showDate = sys.argv[1]
+except:
+	print("\nTwo Options:\n\tEnter a Specfic Date (YYYY-MM-DD)\n\tA Date and Month (YYYY-MM)")
+	showDate = input("\nEnter Date: ")
 
-		if len(show) > 0:
-			os.makedirs(direct, exist_ok=True)
+incHeaders = input("Include Headers (Soundcheck, Different Artists, etc.)? [Y/N]: ")
+incSoundcheck = input("Include Soundcheck? [Y/N]: ")
 
-			fileName = direct + "\\" + date.strip()
-
-			if (os.path.exists(fileName + ".txt")):
-				if index == 0:
-					index = 1
-				
-				fileName = fileName + "_" + str(index)
-
-			f = open(fileName + ".txt", "w")
-
-			for song in show:
-				f = open(fileName + ".txt", "a")
-				f.write(song + "\n")
-				f.close()
-
-			print(f.name + " successfully created")
+def dateCheck(showDate):
+	if (1965 <= int(showDate[0:4]) <= 2023):
+		match len(showDate):
+			case 10:
+				if ((int(showDate[5:7]) / 12 <= 1)
+					and (int(showDate[8:11]) / 31 <= 1) ):
+						return True
+			case 7:
+				if ( int(showDate[5:7]) / 12 <= 1):
+					return True
 
 def titleCase(songName):
-		return songName.title().replace("'S", "'s").replace("Th ", "th ").replace("Nd", "nd").replace("Ll", "ll").replace("'T", "'t").replace("'M", "'m")
-		
-def setlistFind(URL, show_find, index, fileAsk, printAsk, headerAsk):
-	show = []
-	headers = []
-	xn = 0
+	return songName.title().replace("'S", "'s").replace("Th ", "th ").replace("Nd", "nd").replace("Ll", "ll").replace("'T", "'t").replace("'M", "'m")
 
-	# getting the setlist itself
-	showPage = requests.get(URL + show_find.get("href"))
-	get_Setlist = BeautifulSoup(showPage.content, "html.parser")
-	setlist = get_Setlist.find(id="wiki-tab-0-1")
-	setN = setlist.find_all("ol")[0:]
-	pageTitle = get_Setlist.find(id="page-title")
+if not dateCheck(showDate):
+	print("ERROR: Invalid Date")
+	sys.exit()
 
-	for p in setlist.find_all("p"):
-		for item in p.find_all("strong"):
-			if "Soundcheck" not in item.text:
-				headers.append(item.text + ":")
+yearURL = requests.get(URL + "/" + showDate[0:4])
+soupYear = bs4(yearURL.content, "lxml")
+
+def fileOutput(pageTitle):
+	dir = saveDir + pageTitle[0:4] + "\\" + pageTitle[5:7] + "_" + months[int(pageTitle[5:7])] + "\\"
+	index = 1
+	fName = dir + pageTitle[0:11].strip()
 	
-	# if "Soundcheck:" in headers:
-	# 	headers.remove("Soundcheck:")
+	os.makedirs(dir, exist_ok=True)
 
-	if (len(headers) != 0):
-		if (headerAsk.upper() == 'Y'):
-			if (headers[xn] != "Show:"):
-				show.append(headers[xn])
-				xn+=1
-		
-	if (setN is not None):
-		for p in setN:
-			for song in p.find_all("a"):
-				show.append(titleCase(song.text))
-			if (xn < len(headers) and headerAsk.upper() == 'Y'):
-				show.append("\n")
-				show.append(headers[xn])
-				xn+=1
+	if len(show) > 0:	
+		while (os.path.exists(fName + "_" + str(index) + ".txt")):
+			index += 1
 
-	for i, song in enumerate(show):
-		if (song == "\n" and i == -1):
-			show.remove(song)
-		elif (show[-1] == "Show:"):
-			show.remove("Show:")
+		f = open(fName + "_" + str(index) + ".txt", "w")
 
-	if printAsk.upper() == "Y":
-		print("\n" + pageTitle.text.strip()[0:10] + " - " + pageTitle.text.strip()[11:] + "\n")
+		if incHeaders.upper() == "Y":
+			f.write(pageTitle + "\n")
+
 		for song in show:
-			print(song)
-			
-	if (fileAsk.upper() == "Y"):
-		fileCreate(show, pageTitle.text.strip(), index)
+			f = open(fName + "_" + str(index) + ".txt", "a")
 
-def processing(URL, show_find):
-	fileAsk = input("Output to File? [Y/N]:")
-	printAsk = input("Print Setlist? [Y/N]:")
-	headerAsk = input("Include Set Headers (Pre-Show, Different Artists, etc)? [Y/N]:")
+			if ":" in song:
+				f.write("\n" + song + "\n")
+			else:
+				f.write(song + "\n")
+			f.close()
 
-	for show in show_find:
-		if (show.get("href")[-1].isdigit()):
-			num = show.get("href")[-1]
+		print(f.name + " successfully created")
+
+def showPrint(show, pageTitle):
+	print("\n" + pageTitle[0:10] + " - " + pageTitle[11:] + "\n")
+
+	for i, item in enumerate(show):
+		if ":" in item:
+			print("\n" + item)
 		else:
-			num = 0
+			print(item)
 
-		if "/gig:" in show.get("href"):
-			setlistFind(URL, show, num, fileAsk, printAsk, headerAsk)
-		else:
-			print("show not found")
+	print("\n" + "-" * 20 + "\n")
 
-def main():
-	print("Brucebase Setlist Scraper: Gets Setlists From brucebase.wikidot.com")
-	print("\n3 Options:\n\tEnter a Specfic Date (YYYY-MM-DD)\n\tA Date and Month (YYYY-MM)\n\tA Year(YYYY)")
+def processing(item):
+	showPage = requests.get(URL + item.get("href"))
+	getSetlist = bs4(showPage.content, "lxml")
+	setlist = getSetlist.find(id="wiki-tab-0-1")
+	pageTitle = getSetlist.find(id="page-title").text.strip()
 
-	showDate = input("\nEnter Date: ")
-	URL = "http://brucebase.wikidot.com"
+	for i, item in enumerate(setlist.find_all(True)):
+		if item.name == "strong" and item.find_parent().name != "li" and incHeaders.upper() == 'Y':
+			show.append(item.text.strip() + ":")
+		if item.find_parent().name == 'ol':
+			show.append(titleCase(item.text.strip()))
+		if item.find_parent().name == "ul" and incSoundcheck.upper() == 'Y':
+			if incHeaders.upper() == "N":
+				show.append(titleCase(item.text.strip()) + " #")
+			else:
+				show.append(titleCase(item.text.strip()))
 
-	# URL and individual show page get
-	yearURL = requests.get(URL + "/" + showDate[0:4])
-	soup_year = BeautifulSoup(yearURL.content, "html.parser")
+	showPrint(show, pageTitle)
+	fileOutput(pageTitle)
 
-	if len(showDate) == 7:  # only a year and month entered
-		show_find = soup_year.find_all("a", string=re.compile(showDate[0:7] + ".*"))
-		processing(URL, show_find)
-	elif len(showDate) == 4:
-		show_find = soup_year.find_all("a", string=re.compile(showDate[0:4] + ".*"))
-		processing(URL, show_find)
-	elif len(showDate) == 10:  # full date entered, just one show
+match len(showDate):
+	case 10:
 		try:
-			show_find = soup_year.find_all("a", string=re.compile(showDate + ".*"))
+			showFind = soupYear.find_all("a", string=re.compile(showDate + ".*"))
 		except:
-			show_find = soup_year.find("a", string=re.compile(showDate + ".*"))
+			showFind = soupYear.find("a", string=re.compile(showDate + ".*"))
+	case 7:
+		showFind = soupYear.find_all("a", string=re.compile(showDate[0:7] + ".*"))
 
-		processing(URL, show_find)
-
-main()
+for item in showFind:
+	if "/gig:" in item.get("href"):
+		processing(item)
+		show = []
